@@ -17,10 +17,10 @@ enum Operation: String {
 }
 
 class ViewController: UIViewController {
-
+    
     @IBOutlet weak var outputLbl: UILabel!
     
-    var runningNumber = ""
+    private var runningNumber = ""
     var leftValue = ""
     var rightValue = ""
     var result = ""
@@ -30,7 +30,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         outputLbl.text = "0"
-
+        
     }
 
     @IBAction func numberPressed(_ sender: RoundButton) {
@@ -49,12 +49,15 @@ class ViewController: UIViewController {
     }
     
     @IBAction func dotPressed(_ sender: RoundButton) {
-        if runningNumber.count <= 7 {
+        if runningNumber.contains(".") {
+            return
+        }
+        
+        else if runningNumber.count <= 7 {
             runningNumber += "."
             outputLbl.text = runningNumber
         }
     }
-    
     @IBAction func equalPressed(_ sender: RoundButton) {
         operation(operation: currentOperation)
     }
@@ -75,11 +78,56 @@ class ViewController: UIViewController {
         operation(operation: .Divide)
     }
     
+    @IBAction func percentPressed(_ sender: RoundButton) {
+        if runningNumber != "" {
+          runningNumber = "\(Double(runningNumber)! / 100.00)"
+          outputLbl.text = runningNumber
+          leftValue = runningNumber
+
+        }
+        
+        if result != "" {
+            result = "\(Double(result)! / 100.00)"
+            outputLbl.text = result
+            leftValue = result
+            currentOperation = .NULL
+        }
+
+    }
+    
+    @IBAction func convertPressed(_ sender: RoundButton) {
+
+        if runningNumber != ""{
+            runningNumber = "\(Double(runningNumber)! * (-1))"
+            if (Double(runningNumber)!.truncatingRemainder(dividingBy: 1) == 0){
+                     runningNumber = "\(Int(Double(runningNumber)!))"
+                 }
+            outputLbl.text = "\(runningNumber)"
+        }
+        
+        if result != "" {
+            result = "\(Double(result)! * (-1))"
+            leftValue = result
+            if (Double(result)!.truncatingRemainder(dividingBy: 1) == 0){
+                     result = "\(Int(Double(result)!))"
+                 }
+            outputLbl.text = "\(result)"
+        }
+    }
+    
+    
     func operation(operation: Operation){
         if currentOperation != .NULL {
             if runningNumber != ""{
                 rightValue = runningNumber
+                if runningNumber == "." {
+                    return
+                }
                 runningNumber = ""
+                
+                if leftValue == "" {
+                    leftValue = "0"
+                }
                 
                 if currentOperation == .Add {
                     result = "\(Double(leftValue)! + Double(rightValue)!)"
@@ -96,13 +144,16 @@ class ViewController: UIViewController {
                 }
                 outputLbl.text = result
             }
+            
             currentOperation = operation
             
         } else {
             leftValue = runningNumber
             runningNumber = ""
             currentOperation = operation
+
         }
     }
 }
+
 
