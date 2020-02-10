@@ -21,43 +21,50 @@ class ViewController: UIViewController {
     @IBOutlet weak var outputLbl: UILabel!
     
     private var runningNumber = ""
-    var leftValue = ""
-    var rightValue = ""
-    var result = ""
-    var currentOperation: Operation = .NULL
+    private var leftValue = 0.0
+    private var rightValue = 0.0
+    private var result = 0.0
+    private var currentOperation: Operation = .NULL
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         outputLbl.text = "0"
-        
     }
 
     @IBAction func numberPressed(_ sender: RoundButton) {
-        if runningNumber.count <= 8 {
+        if runningNumber.count <= 7 {
             runningNumber += "\(sender.tag)"
             outputLbl.text = runningNumber
         }
+        if runningNumber[runningNumber.startIndex] == "0" {
+            runningNumber = ""
+        }
     }
+    
     @IBAction func allClearPressed(_ sender: RoundButton) {
-        runningNumber = ""
-        leftValue = ""
-        rightValue = ""
-        result = ""
+        leftValue = 0.0
+        rightValue = 0.0
+        result = 0.0
         currentOperation = .NULL
         outputLbl.text = "0"
     }
     
     @IBAction func dotPressed(_ sender: RoundButton) {
         if runningNumber.contains(".") {
+            print((". can be input one time"))
             return
         }
         
-        else if runningNumber.count <= 7 {
-            runningNumber += "."
-            outputLbl.text = runningNumber
+        if runningNumber.count > 7 {
+            print("input number is long.")
+            return
         }
+        
+        runningNumber += "."
+        outputLbl.text = runningNumber
     }
+    
     @IBAction func equalPressed(_ sender: RoundButton) {
         operation(operation: currentOperation)
     }
@@ -82,78 +89,70 @@ class ViewController: UIViewController {
         if runningNumber != "" {
           runningNumber = "\(Double(runningNumber)! / 100.00)"
           outputLbl.text = runningNumber
-          leftValue = runningNumber
+          leftValue = Double(runningNumber)!
 
         }
         
-        if result != "" {
-            result = "\(Double(result)! / 100.00)"
-            outputLbl.text = result
+        if result != 0.0 {
+            result = Double(result) / 100.00
+            outputLbl.text = String(result)
             leftValue = result
             currentOperation = .NULL
         }
-
     }
     
     @IBAction func convertPressed(_ sender: RoundButton) {
-
-        if runningNumber != ""{
-            runningNumber = "\(Double(runningNumber)! * (-1))"
-            if (Double(runningNumber)!.truncatingRemainder(dividingBy: 1) == 0){
-                     runningNumber = "\(Int(Double(runningNumber)!))"
-                 }
-            outputLbl.text = "\(runningNumber)"
+        if runningNumber == "."{
+            return
         }
         
-        if result != "" {
-            result = "\(Double(result)! * (-1))"
+        if runningNumber != ""{
+            runningNumber = "\(Double(runningNumber)! * (-1))"
+            outputLbl.text = "\(runningNumber)"
+        }
+    
+        if result != 0.0 {
+            result = Double(result) * (-1)
             leftValue = result
-            if (Double(result)!.truncatingRemainder(dividingBy: 1) == 0){
-                     result = "\(Int(Double(result)!))"
-                 }
             outputLbl.text = "\(result)"
         }
     }
-    
-    
+
     func operation(operation: Operation){
-        if currentOperation != .NULL {
-            if runningNumber != ""{
-                rightValue = runningNumber
-                if runningNumber == "." {
-                    return
-                }
-                runningNumber = ""
-                
-                if leftValue == "" {
-                    leftValue = "0"
-                }
-                
-                if currentOperation == .Add {
-                    result = "\(Double(leftValue)! + Double(rightValue)!)"
-                } else if currentOperation == .Subtract {
-                     result = "\(Double(leftValue)! - Double(rightValue)!)"
-                } else if currentOperation == .Multiply {
-                     result = "\(Double(leftValue)! * Double(rightValue)!)"
-                } else if currentOperation == .Divide {
-                     result = "\(Double(leftValue)! / Double(rightValue)!)"
-                }
-                leftValue = result
-                if (Double(result)!.truncatingRemainder(dividingBy: 1) == 0){
-                    result = "\(Int(Double(result)!))"
-                }
-                outputLbl.text = result
-            }
-            
+        if runningNumber == "" {
             currentOperation = operation
-            
-        } else {
-            leftValue = runningNumber
+            return
+        }
+        if runningNumber == "." {
+            return
+        }
+        
+        if currentOperation == .NULL {
+            leftValue = Double(runningNumber)!
             runningNumber = ""
             currentOperation = operation
-
+            return
         }
+        
+        rightValue = Double(runningNumber)!
+        runningNumber = ""
+        
+        switch currentOperation {
+        case .Add: result = calc(a: leftValue, b: rightValue){$0 + $1}
+        case .Subtract: result = calc(a: leftValue, b: rightValue){$0 - $1}
+        case .Multiply: result = calc(a: leftValue, b: rightValue){$0 * $1}
+        case .Divide: result = calc(a: leftValue, b: rightValue){$0 / $1}
+        default: break
+        }
+
+        leftValue = result
+//        if result.truncatingRemainder(dividingBy: 1) == 0 {result = }
+        print(result)
+        outputLbl.text = String(result)
+        currentOperation = operation
+    }
+    func calc(a: Double, b: Double, method: (Double, Double) -> Double) -> Double{
+      return method(a, b)
     }
 }
-
 
