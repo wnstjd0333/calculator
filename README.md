@@ -1,4 +1,4 @@
-# calculator
+# calculator/demo
 誰でも簡単に使える感覚的なデザインの計算機です。
 
 Feature
@@ -6,6 +6,7 @@ Feature
 * 一目で分かる一つの画面で構成
 * モダンなデザイン
 * どこかで見たようななじみ
+* Firebaseとの連動
 
 Getting Started
 -------------
